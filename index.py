@@ -70,7 +70,7 @@ def detectLp():
                         lp = helper.read_plate(yolo_license_plate, utils_rotate.deskew(crop_img, cc, ct))
                         if lp != "unknown":
                             list_read_plates.add(lp)
-                            cv2.putText(img, lp, (int(plate[0]), int(plate[1]-10)), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+                            cv2.putText(img, lp, (int(plate[0]), int(plate[1]-10)), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (23,23,226), 2)
                             flag = 1
                             break
                     if flag == 1:
