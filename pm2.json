@@ -1,0 +1,12 @@
+{
+    "apps": [
+        {
+            "exec_mode": "fork_mode",
+            "script": "venv/bin/python index.py",
+            "name": "detect license plate",
+            "node_args": [
+                "--harmony"
+            ]
+        }
+    ]
+}
