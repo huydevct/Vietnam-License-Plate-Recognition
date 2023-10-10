@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "exec_mode": "fork_mode",
+            "script": "venv/bin/python webcam.py",
+            "name": "detect license plate video"
+        }
+    ]
+}

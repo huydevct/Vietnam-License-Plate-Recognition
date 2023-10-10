@@ -33,8 +33,10 @@ def detectLpVideo():
     )
     dest = os.path.join(
         "temp",
-        str(int(time.time() * 1_000_000)) + "." + "mp4",
+        str(int(time.time() * 1_000_000)) + "-out." + "mp4",
     )
+
+    video.save(file_path)
     # vid = cv2.VideoCapture(1)
     vid = cv2.VideoCapture(file_path)
     # fourcc = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
@@ -73,43 +75,52 @@ def detectLpVideo():
                             break
                     if flag == 1:
                         break
-            new_frame_time = time.time()
-            fps = 1/(new_frame_time-prev_frame_time)
-            prev_frame_time = new_frame_time
-            fps = int(fps)
-            cv2.putText(frame, str(fps), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
+            # new_frame_time = time.time()
+            # fps = 1/(new_frame_time-prev_frame_time)
+            # prev_frame_time = new_frame_time
+            # fps = int(fps)
+            # cv2.putText(frame, str(fps), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
             # cv2.imshow('frame', frame)
             # video_out.write(frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+    
+    except Exception as e:
+        print("Occur a Error" + str(e))
+
         vid.release()
         cv2.destroyAllWindows()
+        
         return send_file(dest, mimetype="video/mp4")
-    except:
-        print("Occur a Error")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        else:
-            print("The file does not exist")
+    #     if os.path.exists(file_path):
+    #         os.remove(file_path)
+    #     else:
+    #         print("The file does not exist")
 
-        if os.path.exists(dest):
-            os.remove(dest)
-        else:
-            print("The file does not exist")
+        # if os.path.exists(dest):
+        #     os.remove(dest)
+        # else:
+        #     print("The file does not exist")
 
-        return {"Server error": "An exception occurred"}, 400
-    finally:
-        print("remove files")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        else:
-            print("The file does not exist")
+        # return {"Server error": "An exception occurred"}, 400
+    # finally:
+    #     print("remove files")
+    #     if os.path.exists(file_path):
+    #         os.remove(file_path)
+    #     else:
+    #         print("The file does not exist")
 
-        if os.path.exists(dest):
-            os.remove(dest)
-        else:
-            print("The file does not exist")
+        # if os.path.exists(dest):
+        #     os.remove(dest)
+        # else:
+        #     print("The file does not exist")
+
+    vid.release()
+    cv2.destroyAllWindows()
+    
+    return send_file(dest, mimetype="video/mp4")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)
