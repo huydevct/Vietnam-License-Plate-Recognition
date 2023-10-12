@@ -5,6 +5,7 @@ import torch
 import function.utils_rotate as utils_rotate
 # from IPython.display import display
 import os
+import datetime
 import numpy as np
 from flask import Flask, request, jsonify, make_response, send_file
 import time
@@ -27,12 +28,14 @@ def detectLpVideo():
         return jsonify({"error": "No file part"}), 422
     
     video = request.files["video"]
+    nowTime = datetime.datetime.now()
+    hour = str(nowTime.hour)
     file_path = os.path.join(
-        "temp",
+        "temp/"+hour,
         str(int(time.time() * 1_000_000)) + "." + "mp4",
     )
     dest = os.path.join(
-        "temp",
+        "temp/"+hour,
         str(int(time.time() * 1_000_000)) + "-out." + "mp4",
     )
 
@@ -85,11 +88,16 @@ def detectLpVideo():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    
+        vid.release()
+        video_out.release()
+        cv2.destroyAllWindows()
+        
+        return send_file(dest, mimetype="video/mp4")
     except Exception as e:
         print("Occur a Error" + str(e))
 
         vid.release()
+        video_out.release()
         cv2.destroyAllWindows()
         
         return send_file(dest, mimetype="video/mp4")
@@ -115,11 +123,6 @@ def detectLpVideo():
         #     os.remove(dest)
         # else:
         #     print("The file does not exist")
-
-    vid.release()
-    cv2.destroyAllWindows()
-    
-    return send_file(dest, mimetype="video/mp4")
 
 
 if __name__ == "__main__":
