@@ -153,8 +153,29 @@ def detectLpVideo():
         
         # # Tạo một đối tượng Response với MIME type là video/mp4
         # response = Response(video_data, content_type='video/mp4')
+
+        # Open the video file
+        cap = cv2.VideoCapture(dest)
         
-        return send_file(dest, mimetype='video/gif')
+        # Check if the video file opened successfully
+        if not cap.isOpened():
+            return "Error: Unable to open video file."
+
+        def generate_frames():
+            while True:
+                success, frame = cap.read()
+                if not success:
+                    break
+                ret, buffer = cv2.imencode('.jpg', frame)
+                if not ret:
+                    break
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        # return send_file(dest, mimetype='video/mp4')
     except Exception as e:
         print("Occur a Error" + str(e))
 
