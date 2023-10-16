@@ -1,6 +1,7 @@
 # from PIL import Image
 import cv2
 import torch
+import imageio
 # import math 
 import function.utils_rotate as utils_rotate
 # from IPython.display import display
@@ -54,7 +55,9 @@ def detectLpVideo():
     # vid = cv2.VideoCapture(1)
     vid = cv2.VideoCapture(file_path, cv2.CAP_FFMPEG)
     # fourcc = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
-    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    # fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     # fourcc = cv2.VideoWriter_fourcc('H','2','6','4')
     video_out = cv2.VideoWriter(dest, fourcc, 20.0, (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
@@ -77,7 +80,7 @@ def detectLpVideo():
                     h = int(plate[3] - plate[1]) # ymax - ymin  
                     crop_img = frame[y:y+h, x:x+w]
                     cv2.rectangle(frame, (int(plate[0]),int(plate[1])), (int(plate[2]),int(plate[3])), color = (0,0,225), thickness = 2)
-                    cv2.imwrite("crop.jpg", crop_img)
+                    # cv2.imwrite("crop.jpg", crop_img)
                     # rc_image = cv2.imread("crop.jpg")
                     lp = ""
                     for cc in range(0,2):
@@ -105,20 +108,53 @@ def detectLpVideo():
 
         print('running 2 ...')
 
+        if(video_out.isOpened()):
+            video_out.release()
+        
+
         vid.release()
         video_out.release()
         cv2.destroyAllWindows()
 
         print('running 3 ...')
 
+        # cap = cv2.VideoCapture(dest)
+        # fps = cap.get(cv2.CAP_PROP_FPS)
+        # start_time = 20*fps
+        # end_time = 25*fps
+        # image_lst = []
+        # i = 0
+        
+        # while True:
+        #     ret, frame = cap.read()
+        #     if ret == False:
+        #         break
+        #     if (i>=start_time and i<=end_time):
+        #         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        #         image_lst.append(frame_rgb)
+        
+        #         cv2.imshow('a', frame)
+        #         key = cv2.waitKey(1)
+        #         if key == ord('q'):
+        #             break
+        #     i +=1
+        
+        # cap.release()
+        # cv2.destroyAllWindows()
+        
+        # dest_out = 'temp/output.gif'
+        # imageio.mimsave(dest_out, image_lst, fps=60)
+
+        # time.sleep(5)
+
         # Đọc nội dung video từ tệp (ví dụ: video.mp4)
-        with open(dest, 'rb') as video_file:
-            video_data = video_file.read()
+        # with open(dest, 'rb') as video_file:
+        #     video_data = video_file.read()
         
-        # Tạo một đối tượng Response với MIME type là video/mp4
-        response = Response(video_data, content_type='video/mp4')
+        # # Tạo một đối tượng Response với MIME type là video/mp4
+        # response = Response(video_data, content_type='video/mp4')
         
-        return response
+        return send_file(dest, mimetype='video/gif')
     except Exception as e:
         print("Occur a Error" + str(e))
 
@@ -126,13 +162,17 @@ def detectLpVideo():
         video_out.release()
         cv2.destroyAllWindows()
         
+        time.sleep(5)
+        
         # Đọc nội dung video từ tệp (ví dụ: video.mp4)
         with open(dest, 'rb') as video_file:
             video_data = video_file.read()
         
         # Tạo một đối tượng Response với MIME type là video/mp4
         response = Response(video_data, content_type='video/mp4')
-        
+
+        return response
+
     #     if os.path.exists(file_path):
     #         os.remove(file_path)
     #     else:
