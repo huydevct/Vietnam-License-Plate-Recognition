@@ -2,7 +2,6 @@
 import cv2
 import torch
 import imageio.v2 as imageio
-import pygifsicle
 from moviepy.editor import VideoFileClip
 # import math 
 import function.utils_rotate as utils_rotate

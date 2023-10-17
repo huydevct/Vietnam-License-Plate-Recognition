@@ -12,3 +12,6 @@ seaborn
 scipy
 ipython
 flask
+moviepy
+imageio
+imageio[pyav]
