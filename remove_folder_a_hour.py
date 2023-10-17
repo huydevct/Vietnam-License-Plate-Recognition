@@ -12,7 +12,9 @@ def removeFolderBeforeAHour():
     # else:
     #     print("folder not found")
     for f in os.listdir("temp"):
-        print("a fle in temp")
+        print("a file in temp")
         if f.endswith(".mp4"):
+            os.remove(f)
+        if f.endswith(".gif"):
             os.remove(f)
 removeFolderBeforeAHour()

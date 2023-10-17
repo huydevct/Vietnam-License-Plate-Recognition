@@ -1,7 +1,9 @@
 # from PIL import Image
 import cv2
 import torch
-import imageio
+import imageio.v2 as imageio
+import pygifsicle
+from moviepy.editor import VideoFileClip
 # import math 
 import function.utils_rotate as utils_rotate
 # from IPython.display import display
@@ -118,6 +120,33 @@ def detectLpVideo():
 
         print('running 3 ...')
 
+        # Load the MP4 video
+        video = VideoFileClip(dest)
+
+        # # Set the output GIF file name and duration (in seconds)
+        output_file = os.path.join(
+        "temp",
+        str(int(time.time() * 1_000_000)) + "-out." + "gif",
+        )
+        # duration = video.duration
+
+        # Set the start and end times for the GIF (in seconds)
+        start_time = 0
+        end_time = video.duration  # Set this to the desired duration
+
+        # Convert a subclip of the video to GIF
+        video.subclip(start_time, end_time).to_gif(output_file)
+
+        # # Convert the video to GIF
+        # video.to_gif(output_file, duration=duration)
+        # print(f"Video converted to {output_file}")
+
+
+        # frames = imageio.imread(dest) 
+        # gif_image = pygifsicle.optimize(frames)
+        # with open('temp/out.gif', 'wb') as f: 
+        #     f.write(gif_image) 
+
         # cap = cv2.VideoCapture(dest)
         # fps = cap.get(cv2.CAP_PROP_FPS)
         # start_time = 20*fps
@@ -155,27 +184,29 @@ def detectLpVideo():
         # response = Response(video_data, content_type='video/mp4')
 
         # Open the video file
-        cap = cv2.VideoCapture(dest)
+        # cap = cv2.VideoCapture(dest)
         
-        # Check if the video file opened successfully
-        if not cap.isOpened():
-            return "Error: Unable to open video file."
+        # # Check if the video file opened successfully
+        # if not cap.isOpened():
+        #     return "Error: Unable to open video file."
 
-        def generate_frames():
-            while True:
-                success, frame = cap.read()
-                if not success:
-                    break
-                ret, buffer = cv2.imencode('.jpg', frame)
-                if not ret:
-                    break
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        # def generate_frames():
+        #     while True:
+        #         success, frame = cap.read()
+        #         if not success:
+        #             break
+        #         ret, buffer = cv2.imencode('.jpg', frame)
+        #         if not ret:
+        #             break
+        #         frame = buffer.tobytes()
+        #         yield (b'--frame\r\n'
+        #             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-        return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        # return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+        # time.sleep(5)
         
-        # return send_file(dest, mimetype='video/mp4')
+        return send_file(output_file, mimetype='image/gif')
     except Exception as e:
         print("Occur a Error" + str(e))
 

@@ -1,5 +1,6 @@
 venv
 __pycache__
 *.mp4
+*.gif
 *.jpg
 test/*.mp4
