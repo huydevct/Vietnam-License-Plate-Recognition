@@ -24,6 +24,10 @@ yolo_license_plate.conf = 0.60
 prev_frame_time = 0
 new_frame_time = 0
 
+@app.route("/", methods=["GET"])
+def getApp():
+    return jsonify("License Plate Detect on Video Server")
+
 @app.route("/detect-lp-video", methods=["POST"])
 def detectLpVideo():
     if "video" not in request.files:
