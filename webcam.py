@@ -10,11 +10,13 @@ import os
 import datetime
 import numpy as np
 from flask import Flask, request, jsonify, make_response, send_file, Response
+from flask_cors import CORS, cross_origin
 import time
 # import argparse
 import function.helper as helper
 
 app = Flask(__name__)
+CORS(app, origins=["https://datn-huy.vercel.app", "http://localhost:3000"])
 
 # load model
 yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='model/LP_detector_nano_61.pt', force_reload=True, source='local')
@@ -29,6 +31,7 @@ def getApp():
     return jsonify("License Plate Detect on Video Server")
 
 @app.route("/detect-lp-video", methods=["POST"])
+# @cross_origin(origin='*')
 def detectLpVideo():
     if "video" not in request.files:
         return jsonify({"error": "No file part"}), 422
@@ -72,6 +75,7 @@ def detectLpVideo():
             i += 1
             path = "out_" + str(i) + ".png"
             ret, frame = vid.read()
+            print(frame)
 
             if ret:
                 plates = yolo_LP_detect(frame, size=640)
