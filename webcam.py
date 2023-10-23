@@ -3,6 +3,7 @@ import cv2
 import torch
 import imageio.v2 as imageio
 from moviepy.editor import VideoFileClip
+import base64
 # import math 
 import function.utils_rotate as utils_rotate
 # from IPython.display import display
@@ -69,13 +70,19 @@ def detectLpVideo():
     # fourcc = cv2.VideoWriter_fourcc('H','2','6','4')
     video_out = cv2.VideoWriter(dest, fourcc, 20.0, (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
+    if not vid.isOpened():
+        print("Không thể mở video.")
+        exit()
+
+    frame_rate = 30  # Tốc độ 3 frame/giây
+    frame_count = 0 
+
     i = 0
     try:
         while(True):
             i += 1
             path = "out_" + str(i) + ".png"
             ret, frame = vid.read()
-            print(frame)
 
             if ret:
                 plates = yolo_LP_detect(frame, size=640)
@@ -103,6 +110,14 @@ def detectLpVideo():
                                 break
                         if flag == 1:
                             break
+            else:
+                print("Đã đọc hết video.")
+                break
+            
+            frame_count += 1
+            # Tính thời gian cần chờ giữa các frame
+            wait_time = int(1000 / frame_rate)
+
             # new_frame_time = time.time()
             # fps = 1/(new_frame_time-prev_frame_time)
             # prev_frame_time = new_frame_time
@@ -110,9 +125,7 @@ def detectLpVideo():
             # cv2.putText(frame, str(fps), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
             # cv2.imshow('frame', frame)
             # video_out.write(frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            else:
+            if cv2.waitKey(wait_time) & 0xFF == ord('q'):
                 break
 
         print('running 2 ...')
@@ -212,8 +225,18 @@ def detectLpVideo():
         # return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
         # time.sleep(5)
+
+        # Read the GIF file as binary data
+        with open(output_file, "rb") as gif_file:
+            gif_binary_data = gif_file.read()
+
+        # Encode the binary data as base64
+        base64_string = base64.b64encode(gif_binary_data).decode()
         
-        return send_file(output_file, mimetype='image/gif')
+        # return send_file(output_file, mimetype='image/gif')
+        return jsonify({
+            'data': base64_string
+        })
     except Exception as e:
         print("Occur a Error" + str(e))
 
