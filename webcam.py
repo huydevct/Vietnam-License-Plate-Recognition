@@ -38,16 +38,6 @@ def detectLpVideo():
         return jsonify({"error": "No file part"}), 422
     
     video = request.files["video"]
-    # nowTime = datetime.datetime.now()
-    # hour = str(nowTime.hour)
-    # folder_path = "temp/" + hour
-
-    # folder_path = "C:\\Users\\Administrator\\Documents" + "\\" + hour
-    # isExist = os.path.exists(folder_path)
-    # if not isExist:
-    #     # Create a new directory because it does not exist
-    #     os.makedirs(folder_path)
-    #     print("The new pdf directory is created!")
 
     file_path = os.path.join(
         "temp",
@@ -61,7 +51,6 @@ def detectLpVideo():
     video.save(file_path)
     print('running...')
 
-    # vid = cv2.VideoCapture(1)
     vid = cv2.VideoCapture(file_path, cv2.CAP_FFMPEG)
     # fourcc = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
     # fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
@@ -75,7 +64,8 @@ def detectLpVideo():
         exit()
 
     frame_rate = 30  # Tốc độ 3 frame/giây
-    frame_count = 0 
+    frame_count = 0
+    list_read_plates = set()
 
     i = 0
     try:
@@ -87,7 +77,6 @@ def detectLpVideo():
             if ret:
                 plates = yolo_LP_detect(frame, size=640)
                 list_plates = plates.pandas().xyxy[0].values.tolist()
-                list_read_plates = set()
                 for plate in list_plates:
                     flag = 0
                     x = int(plate[0]) # xmin
@@ -96,8 +85,6 @@ def detectLpVideo():
                     h = int(plate[3] - plate[1]) # ymax - ymin  
                     crop_img = frame[y:y+h, x:x+w]
                     cv2.rectangle(frame, (int(plate[0]),int(plate[1])), (int(plate[2]),int(plate[3])), color = (0,0,225), thickness = 2)
-                    # cv2.imwrite("crop.jpg", crop_img)
-                    # rc_image = cv2.imread("crop.jpg")
                     lp = ""
                     for cc in range(0,2):
                         for ct in range(0,2):
@@ -235,6 +222,7 @@ def detectLpVideo():
         
         # return send_file(output_file, mimetype='image/gif')
         return jsonify({
+            'lps': list(list_read_plates),
             'data': base64_string
         })
     except Exception as e:
@@ -266,17 +254,22 @@ def detectLpVideo():
         #     print("The file does not exist")
 
         # return {"Server error": "An exception occurred"}, 400
-    # finally:
-    #     print("remove files")
-    #     if os.path.exists(file_path):
-    #         os.remove(file_path)
-    #     else:
-    #         print("The file does not exist")
+    finally:
+        print("remove files")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        else:
+            print("The file does not exist")
 
-        # if os.path.exists(dest):
-        #     os.remove(dest)
-        # else:
-        #     print("The file does not exist")
+        if os.path.exists(output_file):
+            os.remove(output_file)
+        else:
+            print("The file does not exist")
+
+        if os.path.exists(dest):
+            os.remove(dest)
+        else:
+            print("The file does not exist")
 
 
 if __name__ == "__main__":
