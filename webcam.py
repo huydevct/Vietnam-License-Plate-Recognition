@@ -63,7 +63,7 @@ def detectLpVideo():
         print("Không thể mở video.")
         exit()
 
-    frame_rate = 30  # Tốc độ 3 frame/giây
+    frame_rate = 1  # Tốc độ 3 frame/giây
     frame_count = 0
     list_read_plates = set()
 
@@ -72,6 +72,12 @@ def detectLpVideo():
         while(True):
             i += 1
             path = "out_" + str(i) + ".png"
+
+            # Thêm dòng này để bỏ qua các frame không cần thiết
+            if i % frame_rate != 0:
+                ret, frame = vid.read()
+                continue
+            
             ret, frame = vid.read()
 
             if ret:
@@ -261,10 +267,10 @@ def detectLpVideo():
         else:
             print("The file does not exist")
 
-        if os.path.exists(output_file):
-            os.remove(output_file)
-        else:
-            print("The file does not exist")
+        # if os.path.exists(output_file):
+        #     os.remove(output_file)
+        # else:
+        #     print("The file does not exist")
 
         if os.path.exists(dest):
             os.remove(dest)
