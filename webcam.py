@@ -294,15 +294,15 @@ def detectLpVideo():
         else:
             print("The file does not exist")
 
-        # if os.path.exists(output_file):
-        #     os.remove(output_file)
-        # else:
-        #     print("The file does not exist")
+        if os.path.exists(dest_out):
+            os.remove(dest_out)
+        else:
+            print("The file does not exist")
 
-        # if os.path.exists(dest):
-        #     os.remove(dest)
-        # else:
-        #     print("The file does not exist")
+        if os.path.exists(dest):
+            os.remove(dest)
+        else:
+            print("The file does not exist")
 
 
 if __name__ == "__main__":
