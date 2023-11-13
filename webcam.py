@@ -3,21 +3,12 @@ import MySQLdb
 import cv2
 import torch
 import subprocess
-import imageio.v2 as imageio
-from moviepy.editor import VideoFileClip
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-import base64
-from flask_sqlalchemy import SQLAlchemy
-# import math 
 import function.utils_rotate as utils_rotate
-# from IPython.display import display
 import os
 from datetime import datetime
-import numpy as np
-from flask import Flask, request, jsonify, make_response, send_file, Response
-from flask_cors import CORS, cross_origin
+from flask import Flask, request, jsonify, send_file, Response
+from flask_cors import CORS
 import time
-# import argparse
 import function.helper as helper
 datetime.utcnow()
 
@@ -35,13 +26,6 @@ yolo_license_plate.conf = 0.60
 
 prev_frame_time = 0
 new_frame_time = 0
-# class LicensePlate(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     queue_id = db.Column(db.Integer)
-#     lps = db.Column(db.String(255), unique=False, nullable=False)
-#     title = db.Column(db.String(255))
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-#     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 @app.route("/", methods=["GET"])
@@ -146,12 +130,6 @@ def detectLpVideo():
 
         print('running 3 ...')
         
-        # return send_file(output_file, mimetype='video/mp4')
-        # return jsonify({
-        #     'lps': list(list_read_plates),
-        #     'data': base64_string
-        # })
-
         # Xây dựng lệnh FFmpeg
         ffmpeg_command = [
             "ffmpeg",
@@ -173,15 +151,9 @@ def detectLpVideo():
         if os.path.exists(dest_out):
             # data = { 'lps':  list(list_read_plates)}
             new_lps = ', '.join(str(item) for item in list_read_plates)
-            # new_license_plate = LicensePlate(
-            #     lps=new_lps,
-            #     title='video',
-            #     queue_id=queue_id
-            # )
             print('lps', new_lps)
 
             try:
-                # db.session.add(new_license_plate)
                 cur.execute("INSERT INTO license_plates (title, lps, queue_id) VALUES (%s,%s,%s)",('video',new_lps,queue_id))    
 
                 db.commit()
