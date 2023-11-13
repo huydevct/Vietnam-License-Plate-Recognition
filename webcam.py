@@ -1,6 +1,7 @@
 # from PIL import Image
 import cv2
 import torch
+import subprocess
 import imageio.v2 as imageio
 from moviepy.editor import VideoFileClip
 import base64
@@ -47,7 +48,10 @@ def detectLpVideo():
         "temp",
         str(int(time.time() * 1_000_000)) + "-out." + "mp4",
     )
-
+    dest_out = os.path.join(
+        "temp",
+        str(int(time.time() * 1_000_000)) + "-output." + "mp4",
+    )
     video.save(file_path)
     print('running...')
 
@@ -134,7 +138,7 @@ def detectLpVideo():
         print('running 3 ...')
 
         # Load the MP4 video
-        video = VideoFileClip(dest)
+        # video = VideoFileClip(dest)
 
         # # Set the output GIF file name and duration (in seconds)
         output_file = os.path.join(
@@ -144,11 +148,11 @@ def detectLpVideo():
         # duration = video.duration
 
         # Set the start and end times for the GIF (in seconds)
-        start_time = 0
-        end_time = video.duration  # Set this to the desired duration
+        # start_time = 0
+        # end_time = video.duration  # Set this to the desired duration
 
         # Convert a subclip of the video to GIF
-        video.subclip(start_time, end_time).to_gif(output_file)
+        # video.subclip(start_time, end_time).to_gif(output_file)
 
         # # Convert the video to GIF
         # video.to_gif(output_file, duration=duration)
@@ -220,17 +224,40 @@ def detectLpVideo():
         # time.sleep(5)
 
         # Read the GIF file as binary data
-        with open(output_file, "rb") as gif_file:
-            gif_binary_data = gif_file.read()
+        # with open(output_file, "rb") as gif_file:
+        #     gif_binary_data = gif_file.read()
 
         # Encode the binary data as base64
-        base64_string = base64.b64encode(gif_binary_data).decode()
+        # base64_string = base64.b64encode(gif_binary_data).decode()
         
-        # return send_file(output_file, mimetype='image/gif')
-        return jsonify({
-            'lps': list(list_read_plates),
-            'data': base64_string
-        })
+        # return send_file(output_file, mimetype='video/mp4')
+        # return jsonify({
+        #     'lps': list(list_read_plates),
+        #     'data': base64_string
+        # })
+
+        # Xây dựng lệnh FFmpeg
+        ffmpeg_command = [
+            "ffmpeg",
+            "-i", dest,
+            "-c:v", "libx264",
+            "-c:a", "aac",
+            "-strict", "experimental",
+            "-b:a", "192k",
+            "-movflags", "faststart",
+            dest_out
+        ]
+
+        try:
+            subprocess.run(ffmpeg_command, check=True)
+            print("Chuyển đổi thành công!")
+        except subprocess.CalledProcessError as e:
+            print(f"Lỗi khi chuyển đổi: {e}")
+
+        if os.path.exists(dest_out):
+            return send_file(dest_out, mimetype='video/mp4')
+        else:
+            return jsonify({"error": "Video file not found"}), 404
     except Exception as e:
         print("Occur a Error" + str(e))
 
@@ -241,7 +268,7 @@ def detectLpVideo():
         time.sleep(5)
         
         # Đọc nội dung video từ tệp (ví dụ: video.mp4)
-        with open(dest, 'rb') as video_file:
+        with open(dest_out, 'rb') as video_file:
             video_data = video_file.read()
         
         # Tạo một đối tượng Response với MIME type là video/mp4
@@ -272,10 +299,10 @@ def detectLpVideo():
         # else:
         #     print("The file does not exist")
 
-        if os.path.exists(dest):
-            os.remove(dest)
-        else:
-            print("The file does not exist")
+        # if os.path.exists(dest):
+        #     os.remove(dest)
+        # else:
+        #     print("The file does not exist")
 
 
 if __name__ == "__main__":
