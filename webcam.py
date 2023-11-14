@@ -155,7 +155,8 @@ def detectLpVideo():
             print('lps', new_lps)
 
             try:
-                cur.execute("INSERT INTO license_plates (title, lps, queue_id) VALUES (%s,%s,%s)",('video',new_lps,queue_id))    
+                print("lps 1: ", new_lps)
+                cur.execute('INSERT INTO license_plates (title, queue_id, lps) VALUES (\'video\',%s,%s)', (queue_id,new_lps))    
 
                 db.commit()
                 return send_file(dest_out, mimetype='video/mp4')
@@ -163,8 +164,8 @@ def detectLpVideo():
                 print(f'Lỗi khi thêm bản ghi mới: {str(e)}')
                 db.rollback()
                 return jsonify({'message': 'Lỗi khi thêm bản ghi mới'}), 500
-            finally:
-                db.close()
+            # finally:
+            #     db.close()
         else:
             return jsonify({"error": "Video file not found"}), 404
         
