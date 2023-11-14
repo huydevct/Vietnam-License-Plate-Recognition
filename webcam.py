@@ -40,6 +40,7 @@ def detectLpVideo():
     
     video = request.files["video"]
     queue_id = request.form.get('queue_id')
+    print("queue_id\n", queue_id)
     if not queue_id:
         return jsonify({'message': 'Thiếu thông tin để thêm bản ghi mới'}), 400
 
