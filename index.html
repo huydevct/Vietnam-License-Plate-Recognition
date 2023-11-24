@@ -38,63 +38,116 @@
         .getUserMedia({ video: true })
         .then((stream) => {
           video.srcObject = stream;
+          video.onloadedmetadata = (e) => {
+            console.log(video.videoWidth, video.videoHeight);
+            async function detectAndRecognize() {
+              const img = tf.browser.fromPixels(video);
+              console.log("Video metadata loaded:", e);
+
+              // Resize and expand the dimensions of the input
+              const inputTensor = img.resizeBilinear([640, 640]).expandDims();
+
+              // Detect license plates
+              const plates = await yoloLPDetect.executeAsync({
+                x: inputTensor,
+              });
+              const listPlates = await plates[0].array();
+
+              const listReadPlates = new Set();
+              if (listPlates.length === 0) {
+                const lp = await readPlate(yoloLicensePlate, img);
+                if (lp !== "unknown") {
+                  ctx.font = "20px Arial";
+                  ctx.fillStyle = "rgb(36, 255, 12)";
+                  ctx.fillText(lp, 7, 70);
+                  listReadPlates.add(lp);
+                }
+              } else {
+                for (const plate of listPlates) {
+                  const [x, y, w, h] = plate;
+                  const cropImg = img.slice([y, x, 0], [h, w, 3]);
+
+                  ctx.strokeStyle = "rgb(0, 0, 225)";
+                  ctx.lineWidth = 2;
+                  ctx.strokeRect(x, y, w, h);
+
+                  const lp = await readPlate(
+                    yoloLicensePlate,
+                    deskew(cropImg, 1, 1)
+                  );
+                  if (lp !== "unknown") {
+                    listReadPlates.add(lp);
+
+                    ctx.font = "20px Arial";
+                    ctx.fillStyle = "rgb(23, 23, 226)";
+                    ctx.fillText(lp, x, y - 10);
+                  }
+                }
+              }
+
+              img.dispose();
+              requestAnimationFrame(detectAndRecognize);
+            }
+
+            detectAndRecognize();
+          };
         })
         .catch((error) => {
           console.error("Error accessing webcam:", error);
         });
 
       // Perform detection and recognition
-      async function detectAndRecognize() {
-        const img = tf.browser.fromPixels(video);
+      // async function detectAndRecognize() {
+      //   const img = tf.browser.fromPixels(video);
 
-        // Detect license plates
-        const plates = await yoloLPDetect.predict(img);
-        const listPlates = await plates.array();
+      //   // Detect license plates
+      //   const plates = await yoloLPDetect.predict(img);
+      //   const listPlates = await plates.array();
 
-        // Process detected plates
-        const listReadPlates = new Set();
-        if (listPlates.length === 0) {
-          const lp = await readPlate(yoloLicensePlate, img);
-          if (lp !== "unknown") {
-            // Draw the license plate on the canvas
-            ctx.font = "20px Arial";
-            ctx.fillStyle = "rgb(36, 255, 12)";
-            ctx.fillText(lp, 7, 70);
+      //   // Process detected plates
+      //   const listReadPlates = new Set();
+      //   if (listPlates.length === 0) {
+      //     const lp = await readPlate(yoloLicensePlate, img);
+      //     if (lp !== "unknown") {
+      //       // Draw the license plate on the canvas
+      //       ctx.font = "20px Arial";
+      //       ctx.fillStyle = "rgb(36, 255, 12)";
+      //       ctx.fillText(lp, 7, 70);
 
-            listReadPlates.add(lp);
-          }
-        } else {
-          for (const plate of listPlates) {
-            const [x, y, w, h] = plate;
-            const cropImg = img.slice([y, x, 0], [h, w, 3]);
+      //       listReadPlates.add(lp);
+      //     }
+      //   } else {
+      //     for (const plate of listPlates) {
+      //       const [x, y, w, h] = plate;
+      //       const cropImg = img.slice([y, x, 0], [h, w, 3]);
 
-            // Draw the bounding box on the canvas
-            ctx.strokeStyle = "rgb(0, 0, 225)";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, w, h);
+      //       // Draw the bounding box on the canvas
+      //       ctx.strokeStyle = "rgb(0, 0, 225)";
+      //       ctx.lineWidth = 2;
+      //       ctx.strokeRect(x, y, w, h);
 
-            // Perform OCR on the cropped image
-            const lp = await readPlate(yoloLicensePlate, deskew(cropImg, 1, 1));
-            if (lp !== "unknown") {
-              listReadPlates.add(lp);
+      //       // Perform OCR on the cropped image
+      //       const lp = await readPlate(yoloLicensePlate, deskew(cropImg, 1, 1));
+      //       if (lp !== "unknown") {
+      //         listReadPlates.add(lp);
 
-              // Draw the recognized license plate on the canvas
-              ctx.font = "20px Arial";
-              ctx.fillStyle = "rgb(23, 23, 226)";
-              ctx.fillText(lp, x, y - 10);
-            }
-          }
-        }
+      //         // Draw the recognized license plate on the canvas
+      //         ctx.font = "20px Arial";
+      //         ctx.fillStyle = "rgb(23, 23, 226)";
+      //         ctx.fillText(lp, x, y - 10);
+      //       }
+      //     }
+      //   }
 
-        // Release the webcam frame
-        img.dispose();
+      //   // Release the webcam frame
+      //   img.dispose();
 
-        // Render the canvas
-        requestAnimationFrame(detectAndRecognize);
-      }
+      //   // Render the canvas
+      //   requestAnimationFrame(detectAndRecognize);
+      // }
 
-      // Start the detection and recognition loop
-      detectAndRecognize();
+      // // Start the detection and recognition loop
+      // detectAndRecognize();
     }
 
     // Helper function: license plate type classification
@@ -112,8 +165,12 @@
 
     async function readPlate(yoloLicensePlate, im) {
       const LPType = "1";
-      const results = yoloLicensePlate.predict(im);
-      const bbList = results.pandas().xyxy[0].values.tolist();
+      // const results = yoloLicensePlate.predict(im);
+      // const bbList = results.pandas().xyxy[0].values.tolist();
+      const results = yoloLicensePlate.executeAsync({
+        x: im.resizeBilinear([640, 640]).expandDims(),
+      });
+      const bbList = await results[0].array();
 
       if (bbList.length === 0 || bbList.length < 7 || bbList.length > 10) {
         return "unknown";
