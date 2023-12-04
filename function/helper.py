@@ -1,11 +1,13 @@
 import math
 
 # license plate type classification helper function
+# tính toán hệ số tuyến tính dựa trên tọa độ của ảnh
 def linear_equation(x1, y1, x2, y2):
     b = y1 - (y2 - y1) * x1 / (x2 - x1)
     a = (y1 - b) / x1
     return a, b
 
+# kiểm tra 1 điểm có nằm gần đg thẳng (x1.y1) và (x2,y2)
 def check_point_linear(x, y, x1, y1, x2, y2):
     a, b = linear_equation(x1, y1, x2, y2)
     y_pred = a*x+b

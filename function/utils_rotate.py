@@ -2,6 +2,7 @@ import numpy as np
 import math
 import cv2
 
+# tăng độ tương phản sáng của ảnh 
 def changeContrast(img):
     lab= cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l_channel, a, b = cv2.split(lab)
@@ -11,12 +12,14 @@ def changeContrast(img):
     enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
     return enhanced_img
 
+# xoay ảnh
 def rotate_image(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
     result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
     return result
 
+# làm phẳng ảnh
 def compute_skew(src_img, center_thres):
     if len(src_img.shape) == 3:
         h, w, _ = src_img.shape
@@ -54,6 +57,7 @@ def compute_skew(src_img, center_thres):
         return 0.0
     return (angle / cnt)*180/math.pi
 
+# xoay ảnh
 def deskew(src_img, change_cons, center_thres):
     if change_cons == 1:
         return rotate_image(src_img, compute_skew(changeContrast(src_img), center_thres))
