@@ -121,8 +121,12 @@
 
     async function readPlate(yoloLicensePlate, im) {
       const LPType = "1";
-      const results = yoloLicensePlate.predict(im);
-      const bbList = results.pandas().xyxy[0].values.tolist();
+      // const results = yoloLicensePlate.predict(im);
+      // const bbList = results.pandas().xyxy[0].values.tolist();
+      const results = yoloLicensePlate.executeAsync({
+        x: im.resizeBilinear([640, 640]).expandDims(),
+      });
+      const bbList = await results[0].array();
 
       if (bbList.length === 0 || bbList.length < 7 || bbList.length > 10) {
         return "unknown";
