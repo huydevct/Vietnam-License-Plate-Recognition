@@ -23,6 +23,9 @@ def serialize_sets(obj):
 
 app = Flask(__name__)
 
+yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='model/LP_detector.pt', force_reload=True, source='local')
+yolo_license_plate = torch.hub.load('yolov5', 'custom', path='model/LP_ocr.pt', force_reload=True, source='local')
+
 @app.route("/detect-lp", methods=["POST"])
 def detectLp():
     if 'image' not in request.files:
@@ -30,18 +33,17 @@ def detectLp():
 
     image = request.files["image"]
     file_path = os.path.join('temp', str(int(time.time() * 1_000_000)) + "." + "jpg")
-    print(file_path)
+    print("file_path: ",file_path)
     out_path = str(int(time.time() * 1_000_000)) + "-out." + "jpg"
     file_path_ouput = "/var/www/html/graduation/temp/detect-lp/" + out_path
     crop_path = os.path.join("temp", "crop.jpg")
 
     image.save(file_path)
 
-    yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='model/LP_detector.pt', force_reload=True, source='local')
-    yolo_license_plate = torch.hub.load('yolov5', 'custom', path='model/LP_ocr.pt', force_reload=True, source='local')
     yolo_license_plate.conf = 0.60
 
     try:
+        print("file_path: ","/media/huy/ubuntu_2/coding/License-Plate-Recognition/"+file_path)
         img = cv2.imread(file_path)
         plates = yolo_LP_detect(img, size=640)
 

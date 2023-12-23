@@ -1,0 +1,5 @@
+Collecting tensorflowjs
+  Using cached tensorflowjs-4.14.0-py3-none-any.whl (89 kB)
+Requirement already satisfied: six<2,>=1.16.0 in ./venv/lib/python3.8/site-packages (from tensorflowjs) (1.16.0)
+Collecting jaxlib>=0.4.13
+  Downloading jaxlib-0.4.13-cp38-cp38-manylinux2014_x86_64.whl (71.6 MB)
