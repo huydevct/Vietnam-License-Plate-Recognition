@@ -30,6 +30,8 @@ yolo_license_plate = torch.hub.load('yolov5', 'custom', path='model/LP_ocr.pt', 
 def detectLp():
     if 'image' not in request.files:
         return jsonify({'error': 'No image part'}),422
+    
+    print("Recieved files...")
 
     image = request.files["image"]
     file_path = os.path.join('temp', str(int(time.time() * 1_000_000)) + "." + "jpg")
@@ -41,6 +43,8 @@ def detectLp():
     image.save(file_path)
 
     yolo_license_plate.conf = 0.60
+
+    print("Start processing...")
 
     try:
         print("file_path: ","/media/huy/ubuntu_2/coding/License-Plate-Recognition/"+file_path)
@@ -56,6 +60,8 @@ def detectLp():
                 cv2.putText(img, lp, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
                 list_read_plates.add(lp)
         else:
+            print("Processing...")
+
             for plate in list_plates:
                 flag = 0
                 x = int(plate[0]) # xmin
@@ -88,6 +94,8 @@ def detectLp():
             "liscense_plates": lps,
             "file_path_out": out_path
         }
+        print("Done...")
+
         return jsonify(response)
     except():
         print("Occur a Error")
