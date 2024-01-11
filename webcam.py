@@ -160,12 +160,12 @@ def detectLpVideo():
 
                 db.commit()
                 return send_file(dest_out, mimetype='video/mp4')
-            except Exception as e:
+            except MySQLdb.Error as e:
                 print(f'Lỗi khi thêm bản ghi mới: {str(e)}')
                 db.rollback()
                 return jsonify({'message': 'Lỗi khi thêm bản ghi mới'}), 500
-            # finally:
-            #     db.close()
+            finally:
+                db.close()
         else:
             return jsonify({"error": "Video file not found"}), 404
         
