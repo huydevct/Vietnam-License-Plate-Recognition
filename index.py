@@ -50,8 +50,6 @@ def detectLp():
         print("file_path: ","/media/huy/ubuntu_2/coding/License-Plate-Recognition/"+file_path)
         img = cv2.imread(file_path)
         plates = yolo_LP_detect(img, size=640)
-
-        plates = yolo_LP_detect(img, size=640)
         list_plates = plates.pandas().xyxy[0].values.tolist()
         list_read_plates = set()
         if len(list_plates) == 0:
